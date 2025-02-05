@@ -102,6 +102,7 @@ if (!is_numeric($number)) {
         "message" => "The value must be a number"
     ];
     sendJsonResponse($data, 400);
+    exit;
 }
 
 // responses for the number
