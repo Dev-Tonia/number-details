@@ -2,6 +2,15 @@
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 
+
+// Input validation and processing
+if (!isset($_GET['number']) || !is_numeric($_GET['number'])) {
+    http_response_code(400);
+    echo json_encode(["error" => true, 'number' => $_GET['number']]);
+    exit;
+}
+
+
 // Optimized prime check without hardcoded values
 function isPrime($num)
 {
@@ -17,6 +26,7 @@ function isPrime($num)
 }
 
 // Calculate if a number is perfect by finding its divisors
+
 function isPerfect($num)
 {
     if ($num < 1) return false;
@@ -95,13 +105,6 @@ function getFunFact($num, $timeout = 0.3)
 
     $response = @file_get_contents($url, false, $ctx);
     return $response === FALSE ? 'Fact unavailable' : $response;
-}
-
-// Input validation and processing
-if (!isset($_GET['number']) || !is_numeric($_GET['number'])) {
-    http_response_code(400);
-    echo json_encode(["error" => true, 'number' => $_GET['number']]);
-    exit;
 }
 
 $number = (int)$_GET['number'];
