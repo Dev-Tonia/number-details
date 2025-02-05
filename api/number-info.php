@@ -10,7 +10,6 @@ function isPrime($num)
     if ($num < 2) return false;
 
     for ($i = 2; $i * $i <= $num; $i++) {
-
         if ($num % $i == 0) {
             return false;
         }
@@ -51,13 +50,11 @@ function sumOfDigits($num)
 }
 
 // get the properties of a number 
-
 function getProperties($num)
 {
     $properties = [];
     $is_armstrong = isArmstrong($num);
     if ($is_armstrong) {
-
         $properties[] = "armstrong";
     }
     $properties[] = ($num % 2) ? "odd" : "even";
@@ -68,27 +65,20 @@ function getProperties($num)
 function getFunFact($num)
 {
     $url = "http://numbersapi.com/{$num}/math";
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'header' => 'Content-Type: application/json',
+        ],
+    ]);
 
-    // Initialize cURL
-    $ch = curl_init();
+    $response = file_get_contents($url, false, $context);
 
-    // Set the URL and other options
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-    // Execute the cURL request and store the response
-    $response = curl_exec($ch);
-
-    // Check for errors
-    if (curl_errno($ch)) {
-        return 'Error:' . curl_error($ch);
-    } else {
-        // Output the response
-        return $response;
+    if ($response === FALSE) {
+        return 'Error: Unable to retrieve fun fact.';
     }
 
-    // Close the cURL session
-    curl_close($ch);
+    return $response;
 }
 
 // reusable function to send json response
@@ -102,10 +92,7 @@ function sendJsonResponse($data, $status = 200)
 }
 
 // getting the number from the url
-
 $number = (int)$_GET['number'];
-getFunFact(100);
-
 
 // check if the value from the url is a number 
 if (!is_numeric($number)) {
@@ -116,7 +103,6 @@ if (!is_numeric($number)) {
     ];
     sendJsonResponse($data, 400);
 }
-
 
 // responses for the number
 $response = [
