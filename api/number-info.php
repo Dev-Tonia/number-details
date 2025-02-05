@@ -74,7 +74,8 @@ function getFunFact($num)
     if ($response === FALSE) {
         return 'Error: Unable to retrieve fun fact.';
     }
-    return $response;
+    $response = json_decode($response, true);
+    return $response['text'];
 }
 
 // Reusable function to send JSON response
