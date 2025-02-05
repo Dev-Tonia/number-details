@@ -93,9 +93,8 @@ $number = $_GET['number'];
 // Check if the value from the URL is a number 
 if (!is_numeric($number)) {
     $data = [
-        "number" => $number . ' is not a number',
+        "number" => $number,
         "error" => true,
-        "message" => "The value must be a number"
     ];
     sendJsonResponse($data, 400);
     exit;
