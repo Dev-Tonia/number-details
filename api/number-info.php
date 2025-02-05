@@ -1,108 +1,112 @@
 <?php
-// Set response content type to JSON and handle CORS
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 
-// Check if a number is a prime number  
+// Optimized prime check without hardcoded values
 function isPrime($num)
 {
     if ($num < 2) return false;
-    for ($i = 2; $i * $i <= $num; $i++) {
-        if ($num % $i == 0) {
-            return false;
-        }
+    if ($num === 2) return true;
+    if ($num % 2 === 0) return false;
+
+    $sqrt = (int)sqrt($num);
+    for ($i = 3; $i <= $sqrt; $i += 2) {
+        if ($num % $i === 0) return false;
     }
     return true;
 }
 
-// Check if the number is a perfect number
+// Calculate if a number is perfect by finding its divisors
 function isPerfect($num)
 {
     if ($num < 1) return false;
-    $sum = 0;
-    for ($i = 1; $i < $num; $i++) {
-        if ($num % $i == 0) {
+    $sum = 1;
+    $sqrt = (int)sqrt($num);
+
+    for ($i = 2; $i <= $sqrt; $i++) {
+        if ($num % $i === 0) {
             $sum += $i;
+            if ($i !== $num / $i) {
+                $sum += $num / $i;
+            }
         }
     }
-    return $sum == $num;
+
+    return $sum === $num && $num !== 1;
 }
 
-// Check if the number is an Armstrong number
+// Armstrong number check with dynamic power calculation
 function isArmstrong($num)
 {
+    static $powers = [];
     $sum = 0;
-    $digits = str_split($num);
-    $power = strlen($num);
-    foreach ($digits as $digit) {
-        $sum += pow($digit, $power);
+    $numStr = (string)$num;
+    $len = strlen($numStr);
+
+    // Calculate powers for this length if not already cached
+    if (!isset($powers[$len])) {
+        $powers[$len] = [];
+        for ($i = 0; $i < 10; $i++) {
+            $powers[$len][$i] = pow($i, $len);
+        }
     }
-    return $sum == $num;
+
+    for ($i = 0; $i < $len; $i++) {
+        $digit = (int)$numStr[$i];
+        $sum += $powers[$len][$digit];
+        if ($sum > $num) return false;  // Early exit if sum exceeds number
+    }
+    return $sum === $num;
 }
 
-// Sum of the digits of the number
+// Optimized digit sum using mathematical approach
 function sumOfDigits($num)
 {
-    return array_sum(str_split($num));
+    $sum = 0;
+    while ($num > 0) {
+        $sum += $num % 10;
+        $num = (int)($num / 10);
+    }
+    return $sum;
 }
 
-// Get the properties of a number 
+// Get properties dynamically
 function getProperties($num)
 {
     $properties = [];
     if (isArmstrong($num)) {
         $properties[] = "armstrong";
     }
-    $properties[] = ($num % 2) ? "odd" : "even";
+    $properties[] = ($num & 1) ? "odd" : "even";
     return $properties;
 }
 
-// Get the fun fact of the number with a timeout
-function getFunFact($num)
+// Get fun fact with configurable timeout
+function getFunFact($num, $timeout = 0.3)
 {
     $url = "http://numbersapi.com/{$num}/math";
-    $context = stream_context_create([
+    $ctx = stream_context_create([
         'http' => [
             'method' => 'GET',
-            'header' => 'Content-Type: application/json',
-            'timeout' => 0.5 // Set timeout to 500ms
-        ],
+            'timeout' => $timeout,
+            'ignore_errors' => true
+        ]
     ]);
 
-    $response = @file_get_contents($url, false, $context);
-
-    if ($response === FALSE) {
-        return 'Error: Unable to retrieve fun fact.';
-    }
-    $response = json_decode($response, true);
-    return $response['text'];
+    $response = @file_get_contents($url, false, $ctx);
+    return $response === FALSE ? 'Fact unavailable' : $response;
 }
 
-// Reusable function to send JSON response
-function sendJsonResponse($data, $status = 200)
-{
-    http_response_code($status);
-    $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-    echo $json;
+// Input validation and processing
+if (!isset($_GET['number']) || !is_numeric($_GET['number'])) {
+    http_response_code(400);
+    echo json_encode(["error" => true, 'number' => $_GET['number']]);
     exit;
 }
 
-// Getting the number from the URL
-$number = $_GET['number'];
+$number = (int)$_GET['number'];
 
-// Check if the value from the URL is a number 
-if (!is_numeric($number)) {
-    $data = [
-        "number" => $number,
-        "error" => true,
-    ];
-    sendJsonResponse($data, 400);
-    exit;
-}
-
-$number = (int)$number;
-
-// Responses for the number
+// Generate response
 $response = [
     "number" => $number,
     "is_prime" => isPrime($number),
@@ -111,4 +115,5 @@ $response = [
     "digit_sum" => sumOfDigits($number),
     "fun_fact" => getFunFact($number)
 ];
-sendJsonResponse($response);
+
+echo json_encode($response, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
