@@ -1,14 +1,12 @@
 <?php
-// Set response content type to JSON and handle cors
+// Set response content type to JSON and handle CORS
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 
-// check if a number is prime number  
+// Check if a number is a prime number  
 function isPrime($num)
 {
-    // checking if the number is less than 2 
     if ($num < 2) return false;
-
     for ($i = 2; $i * $i <= $num; $i++) {
         if ($num % $i == 0) {
             return false;
@@ -17,10 +15,9 @@ function isPrime($num)
     return true;
 }
 
-// check if the number is perfect number
+// Check if the number is a perfect number
 function isPerfect($num)
 {
-    // check if the number is less than 1 
     if ($num < 1) return false;
     $sum = 0;
     for ($i = 1; $i < $num; $i++) {
@@ -31,7 +28,7 @@ function isPerfect($num)
     return $sum == $num;
 }
 
-// check if the number is armstrong number
+// Check if the number is an Armstrong number
 function isArmstrong($num)
 {
     $sum = 0;
@@ -43,25 +40,24 @@ function isArmstrong($num)
     return $sum == $num;
 }
 
-// sum of the digits of the number
+// Sum of the digits of the number
 function sumOfDigits($num)
 {
     return array_sum(str_split($num));
 }
 
-// get the properties of a number 
+// Get the properties of a number 
 function getProperties($num)
 {
     $properties = [];
-    $is_armstrong = isArmstrong($num);
-    if ($is_armstrong) {
+    if (isArmstrong($num)) {
         $properties[] = "armstrong";
     }
     $properties[] = ($num % 2) ? "odd" : "even";
     return $properties;
 }
 
-// get the fun fact of the number
+// Get the fun fact of the number with a timeout
 function getFunFact($num)
 {
     $url = "http://numbersapi.com/{$num}/math";
@@ -69,32 +65,31 @@ function getFunFact($num)
         'http' => [
             'method' => 'GET',
             'header' => 'Content-Type: application/json',
+            'timeout' => 0.5 // Set timeout to 500ms
         ],
     ]);
 
-    $response = file_get_contents($url, false, $context);
+    $response = @file_get_contents($url, false, $context);
 
     if ($response === FALSE) {
         return 'Error: Unable to retrieve fun fact.';
     }
-    $response = json_decode($response, true);
-    return $response['text'];
+    return $response;
 }
 
-// reusable function to send json response
+// Reusable function to send JSON response
 function sendJsonResponse($data, $status = 200)
 {
     http_response_code($status);
     $json = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-
     echo $json;
     exit;
 }
 
-// getting the number from the url
-$number = (int)$_GET['number'];
+// Getting the number from the URL
+$number = $_GET['number'];
 
-// check if the value from the url is a number 
+// Check if the value from the URL is a number 
 if (!is_numeric($number)) {
     $data = [
         "number" => $number . ' is not a number',
@@ -105,7 +100,9 @@ if (!is_numeric($number)) {
     exit;
 }
 
-// responses for the number
+$number = (int)$number;
+
+// Responses for the number
 $response = [
     "number" => $number,
     "is_prime" => isPrime($number),
