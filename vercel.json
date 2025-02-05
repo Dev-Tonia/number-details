@@ -1,13 +1,18 @@
 {
   "functions": {
-    "api/**/*.php": {
+    "api//*.php": {
       "runtime": "vercel-php@0.7.3"
     }
   },
-  "routes": [{ "src": "/api/classify-number", "dest": "/api/index.php" }],
-  "env": {
-    "NOW_PHP_FOO": "bar3"
-  },
+  "routes": [
+    {
+      "src": "/api/classify-number",
+      "dest": "/api/index.php",
+      "headers": {
+        "Content-Type": "application/json; charset=utf-8"
+      }
+    }
+  ],
   "build": {
     "env": {
       "NOW_PHP_DEBUG": "1"
