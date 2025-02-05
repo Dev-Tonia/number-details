@@ -78,7 +78,7 @@ function getFunFact($num)
         return 'Error: Unable to retrieve fun fact.';
     }
 
-    return $response;
+    return $response['text'];
 }
 
 // reusable function to send json response
